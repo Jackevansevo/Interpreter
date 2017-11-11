@@ -1,0 +1,8 @@
+int main() {
+  int x = 2;
+  int retval = 0;
+  if (x % 2 == 0) {
+    retval = 1;
+  }
+  return retval;
+}

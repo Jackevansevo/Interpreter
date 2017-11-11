@@ -1,0 +1,34 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Node	parse.py	/^class Node:$/;"	c	language:Python
+__str__	parse.py	/^    def __str__(self):$/;"	m	language:Python	class:Node	file:
+__repr__	parse.py	/^    def __repr__(self):$/;"	m	language:Python	class:Node	file:
+__iter__	parse.py	/^    def __iter__(self):$/;"	m	language:Python	class:Node	file:
+leaf_children	parse.py	/^    def leaf_children(self):$/;"	m	language:Python	class:Node
+is_identifier	parse.py	/^    def is_identifier(self):$/;"	m	language:Python	class:Node
+is_constant	parse.py	/^    def is_constant(self):$/;"	m	language:Python	class:Node
+is_leaf	parse.py	/^    def is_leaf(self):$/;"	m	language:Python	class:Node
+parse_ast	parse.py	/^def parse_ast(ast):$/;"	f	language:Python
+get_next_indented	parse.py	/^def get_next_indented(nodes, head):$/;"	f	language:Python
+parse	parse.py	/^def parse(nodes):$/;"	f	language:Python
+line_count	utils.py	/^def line_count(f):$/;"	f	language:Python
+draw_graph	utils.py	/^def draw_graph(head):$/;"	f	language:Python
+build_graph	utils.py	/^def build_graph(graph, node):$/;"	f	language:Python
+Param	interpret.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
+interpret_maths	interpret.py	/^def interpret_maths(node, environment):$/;"	f	language:Python
+interpret	interpret.py	/^def interpret(node, environment):$/;"	f	language:Python
+parse_args	interpret.py	/^def parse_args():$/;"	f	language:Python
+args	interpret.py	/^    args = parse_args()$/;"	v	language:Python
+cmd	interpret.py	/^    cmd = f".\/mycc < {args.file.name}"$/;"	v	language:Python
+out	interpret.py	/^    out = run(cmd, shell=True, check=True, stdout=PIPE, stderr=STDOUT)$/;"	v	language:Python
+output	interpret.py	/^    output = out.stdout.decode('utf-8')$/;"	v	language:Python
+outlines	interpret.py	/^    outlines = output.splitlines()$/;"	v	language:Python
+line_count	interpret.py	/^    line_count = line_count(args.file)$/;"	v	language:Python
+source	interpret.py	/^    source = outlines[:line_count]$/;"	v	language:Python
+ast	interpret.py	/^    ast = outlines[line_count:]$/;"	v	language:Python
+head	interpret.py	/^    head = parse_ast(ast)$/;"	v	language:Python
+environment	interpret.py	/^    environment = deque([{}])$/;"	v	language:Python
