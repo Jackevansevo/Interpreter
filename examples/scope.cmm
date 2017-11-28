@@ -1,7 +1,0 @@
-int func() { int x = 10; }
-
-int main() {
-  int x = 5;
-  func();
-  return x;
-}

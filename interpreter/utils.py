@@ -16,7 +16,7 @@ def draw_graph(head):
 
 def build_graph(graph, node):
     node_id = str(id(node))
-    graph.node(node_id, node.tok)
+    graph.node(node_id, node.tok.lexeme)
     if node.lhs:
         graph = build_graph(graph, node.lhs)
         graph.edge(node_id, str(id(node.lhs)))

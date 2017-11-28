@@ -1,0 +1,16 @@
+/* Answer: 16 */
+
+int square(int a) {
+  return a * a;
+}
+
+function twice(function f) {
+  int g(int x) { return f(f(x)); }
+  return g;
+}
+
+int main() {
+  cube = twice(square);
+  return cube(2);
+}
+

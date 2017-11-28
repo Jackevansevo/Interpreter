@@ -1,126 +1,196 @@
 import argparse
 import sys
-from collections import ChainMap, deque, namedtuple
-from operator import add, mod, mul, sub, truediv
+from collections import namedtuple
+from operator import add, eq, floordiv, ge, gt, le, lt, mod, mul, ne, sub
 from subprocess import PIPE, STDOUT, run
 
+from interpreter.frame import Frame
 from interpreter.parse import parse_ast
 from interpreter.utils import draw_graph, line_count
 
+operators = {
+    '+': add, '-': sub, '*': mul, '%': mod, '/': floordiv,
+    '==': eq, '!=': ne, '>': gt, '<': lt, '>=': ge, '<=': le
+}
+
+ret_val = None
+returning = False
+
 # Function parameter type
-Param = namedtuple('Param', ['type', 'name'])
-Func = namedtuple('Func', ['environment', 'signature', 'body'])
+Func = namedtuple('Func', ['node', 'env'])
+
+
+def interpret_tree(head):
+    # Reset globals
+    global returning
+    global ret_val
+    returning = False
+    ret_val = None
+    interpret(head, Frame({}, {}))
+    return ret_val
+
+
+def interpret_if(node, environment):
+    # Check if the if statement has an else clause
+    predicate = interpret(node.lhs, environment)
+
+    if node.rhs.tok.lexeme == "else":
+        if predicate:
+            return interpret(node.rhs.lhs, Frame({}, environment))
+        else:
+            return interpret(node.rhs.rhs, Frame({}, environment))
+    else:
+        if interpret(node.lhs, environment):
+            return interpret(node.rhs, Frame({}, environment))
+        else:
+            return
+
+
+def interpret_return(node, environment):
+    global returning
+    global ret_val
+    ret_val = interpret(node.lhs, environment)
+    returning = True
+    return
+
+
+def interpret_function(node, environment):
+    # Save the functions node and current environment in the environment
+    func = Func(node, environment)
+    environment.bindings[node.lhs.rhs.lhs.tok.lexeme] = func
+
+    # Check if function is main
+    if node.lhs.rhs.lhs.tok.lexeme == "main":
+        return interpret(node.rhs, Frame({}, environment))
+    else:
+        # Avoid interpreting other functions
+        return
+
+
+def interpret_apply(node, environment):
+
+    global returning
+    global ret_val
+
+    if node.lhs.tok.lexeme == "print":
+        print(interpret(node.rhs, environment))
+        return
+
+    try:
+        func, env = environment[node.lhs.tok.lexeme]
+    except KeyError as error:
+        sys.exit(f'NameError: func {error} undefined')
+    else:
+        if node.rhs:
+            args = [interpret(n, environment) for n in node.rhs.func_args]
+        else:
+            args = []
+        params = func.func_params
+
+        # Checks length of arguments against function params
+        if len(params) != len(args):
+            func_name = func.lhs.rhs.lhs
+            print(f"Wrong number of arguments passed to func {func_name}")
+            param_str = list(map(tuple, params))
+            print("Expected:", len(params), "\n ", param_str)
+            print("Got:", len(args), "\n ", args)
+            sys.exit(1)
+
+        # Basic type checking
+        for param, arg in zip(params, args):
+            if param.type == "int" and not isinstance(arg, int):
+                print("Type Error")
+                print(f"Expected: {param.type}")
+                print(f"Given {arg}")
+                sys.exit(1)
+
+        bindings = {p.name: a for p, a in zip(params, args)}
+        # Create new environment for function with bindings from env
+        new_frame = Frame(bindings, environment[node.lhs.tok.lexeme].env)
+        interpret(func.rhs, new_frame)
+        if returning:
+            returning = False
+        return_type = func.lhs.lhs.tok.lexeme
+        if return_type == 'int' and not isinstance(ret_val, int):
+            print("Type Error")
+            print(f"Expected: {return_type}")
+            print(f"Given {type(ret_val)}")
+            sys.exit(1)
+        return ret_val
+
+
+def interpret_operators(node, environment):
+    return int(operators[node.tok.lexeme](
+        interpret(node.lhs, environment),
+        interpret(node.rhs, environment)
+    ))
+
+
+def interpret_binding(node, environment):
+    # Initialize variables
+    if node.lhs.tok.lexeme == "int" and node.rhs.tok.lexeme != "=":
+        environment.bindings[node.rhs.tok.lexeme] = 0
+    elif node.lhs.tok.lexeme == "function":
+        environment.bindings[node.rhs.tok.lexeme] = (None, None)
+    interpret(node.lhs, environment)
+    return interpret(node.rhs, environment)
+
+
+def interpret_assingment(node, environment):
+    # Handle assingments
+    rhs = interpret(node.rhs, environment)
+    environment[node.lhs.tok.lexeme] = rhs
+
+
+def default_interpret(node, environment):
+    interpret(node.lhs, environment)
+    return interpret(node.rhs, environment)
+
+
+cases = {
+    ';': default_interpret,
+    '=': interpret_assingment,
+    'D': interpret_function,
+    'apply': interpret_apply,
+    'if': interpret_if,
+    'return': interpret_return,
+    '~': interpret_binding,
+}
 
 
 def interpret(node, environment):
 
-    current_frame = next(iter(environment))
+    global returning
+    global ret_val
 
-    if node.tok == "return":
-        return interpret(node.lhs, environment)
-
-    if node.tok == "if":
-
-        # Check if the if statement has an else clause
-        if node.rhs.tok == "else":
-            if interpret(node.lhs, environment):
-                return interpret(node.rhs.lhs, environment)
-            else:
-                return interpret(node.rhs.rhs, environment)
-        else:
-            if interpret(node.lhs, environment):
-                return interpret(node.rhs, environment)
-            else:
-                return
-
-    if node.tok == "D":
-        # [TODO] Save the current environment and store it alongside the node
-        current_frame[node.lhs.rhs.lhs.tok] = node
-        # Check if function is main
-        if node.lhs.rhs.lhs.tok == "main":
-            interpret(node.lhs, environment)
-            return interpret(node.rhs, environment)
-        else:
-            return
-
-    if node.tok == "apply":
-        try:
-            func = ChainMap(*environment).get(node.lhs.tok)
-        except KeyError as error:
-            sys.exit(f'NameError: func {error} undefined')
-        else:
-            # Check if function takes arguments
-            if not func.lhs.rhs.rhs:
-                # Create a new environment frame
-                return interpret(func.rhs, deque([{}]))
-
-            # Handle arguments
-            args = [interpret(l, environment) for l in node.rhs.leaf_children]
-
-            fn_nodes = [leaf.tok for leaf in func.lhs.rhs.rhs.leaf_children]
-            params = [Param(*p) for p in zip(fn_nodes[::2], fn_nodes[1::2])]
-
-            # Checks length of arguments against function params
-            if len(params) != len(args):
-                func_name = func.lhs.rhs.lhs
-                print(f"Wrong number of arguments passed to func {func_name}")
-                param_str = list(map(tuple, params))
-                print("Expected:", len(params), "\n ", param_str)
-                print("Got:", len(args), "\n ", args)
-                sys.exit(1)
-
-            # Basic type checking
-            for param, arg in zip(params, args):
-                if param.type == "int" and not isinstance(arg, int):
-                    print("Type Error")
-                    print(f"Expected: {param.type}")
-                    print(f"Given {arg}")
-                    sys.exit(1)
-
-            func_environment = {p.name: a for p, a in zip(params, args)}
-            # Merge current frame with new function environment
-            current_frame = {**current_frame, **func_environment}
-            return interpret(func.rhs, deque([current_frame]))
+    if returning:
+        return
 
     if node.is_leaf:
 
-        # Skip builtins
-        if node.tok in {"int", "F"}:
-            return node.tok
+        if node.tok.lexeme == "int":
+            return
 
-        # If token is a digit
-        if node.is_constant:
-            return node.val
+        # Return underlying value of a constant
+        if node.tok.is_constant:
+            return node.tok.val
 
-        if node.is_identifier:
-            var = ChainMap(*environment).get(node.tok)
+        if node.tok.is_identifier:
+            var = environment.get(node.tok.lexeme)
             if var is None:
                 sys.exit(f"{node.tok} Undefined")
             return var
 
-        return node.tok
-
-    # Handle equality
-    if node.tok == "==":
-        lhs = interpret(node.lhs, environment)
-        rhs = interpret(node.rhs, environment)
-        # Cast boolean to an integer
-        return int(lhs == rhs)
-
-    if node.tok == "=":
-        rhs = interpret(node.rhs, environment)
-        current_frame[node.lhs.tok] = interpret(node.rhs, environment)
-        return
-
     # Handle maths operators
-    operators = {'+': add, '-': sub, '*': mul, '%': mod, '/': truediv}
-    if node.tok in operators.keys():
-        return operators.get(node.tok)(
-            interpret(node.lhs, environment), interpret(node.rhs, environment)
-        )
+    elif node.tok.lexeme in operators:
+        return interpret_operators(node, environment)
 
-    interpret(node.lhs, environment)
-    return interpret(node.rhs, environment)
+    else:
+        interpret_case = cases.get(node.tok.lexeme)
+        if interpret_case:
+            return interpret_case(node, environment)
+        else:
+            raise Exception(f"Unrecognised token: {node.tok}")
 
 
 def parse_args():
@@ -150,18 +220,7 @@ def make_ast(f):
     return ast
 
 
-def interpret_file(fname):
-    with open(fname) as f:
-        return interpret_node(parse_ast(make_ast(f)))
-
-
-def interpret_node(node):
-    # Environment is a queue of frames
-    environment = deque([{}])
-    return interpret(node, environment)
-
-
-if __name__ == '__main__':
+def main():
 
     args = parse_args()
 
@@ -176,4 +235,7 @@ if __name__ == '__main__':
     if args.graph:
         draw_graph(head)
 
-    print(interpret_node(head))
+    interpret_tree(head)
+
+    # Exit with correct status code
+    sys.exit(ret_val)

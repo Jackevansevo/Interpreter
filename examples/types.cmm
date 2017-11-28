@@ -1,0 +1,6 @@
+int thing() {
+  int square(int b) { return a * a; }
+  return square;
+}
+
+int main() { return thing(); }

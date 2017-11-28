@@ -4,31 +4,50 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-Node	parse.py	/^class Node:$/;"	c	language:Python
-__str__	parse.py	/^    def __str__(self):$/;"	m	language:Python	class:Node	file:
-__repr__	parse.py	/^    def __repr__(self):$/;"	m	language:Python	class:Node	file:
-__iter__	parse.py	/^    def __iter__(self):$/;"	m	language:Python	class:Node	file:
-leaf_children	parse.py	/^    def leaf_children(self):$/;"	m	language:Python	class:Node
-is_identifier	parse.py	/^    def is_identifier(self):$/;"	m	language:Python	class:Node
-is_constant	parse.py	/^    def is_constant(self):$/;"	m	language:Python	class:Node
-is_leaf	parse.py	/^    def is_leaf(self):$/;"	m	language:Python	class:Node
-parse_ast	parse.py	/^def parse_ast(ast):$/;"	f	language:Python
-get_next_indented	parse.py	/^def get_next_indented(nodes, head):$/;"	f	language:Python
-parse	parse.py	/^def parse(nodes):$/;"	f	language:Python
-line_count	utils.py	/^def line_count(f):$/;"	f	language:Python
-draw_graph	utils.py	/^def draw_graph(head):$/;"	f	language:Python
-build_graph	utils.py	/^def build_graph(graph, node):$/;"	f	language:Python
-Param	interpret.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
-interpret_maths	interpret.py	/^def interpret_maths(node, environment):$/;"	f	language:Python
-interpret	interpret.py	/^def interpret(node, environment):$/;"	f	language:Python
-parse_args	interpret.py	/^def parse_args():$/;"	f	language:Python
-args	interpret.py	/^    args = parse_args()$/;"	v	language:Python
-cmd	interpret.py	/^    cmd = f".\/mycc < {args.file.name}"$/;"	v	language:Python
-out	interpret.py	/^    out = run(cmd, shell=True, check=True, stdout=PIPE, stderr=STDOUT)$/;"	v	language:Python
-output	interpret.py	/^    output = out.stdout.decode('utf-8')$/;"	v	language:Python
-outlines	interpret.py	/^    outlines = output.splitlines()$/;"	v	language:Python
-line_count	interpret.py	/^    line_count = line_count(args.file)$/;"	v	language:Python
-source	interpret.py	/^    source = outlines[:line_count]$/;"	v	language:Python
-ast	interpret.py	/^    ast = outlines[line_count:]$/;"	v	language:Python
-head	interpret.py	/^    head = parse_ast(ast)$/;"	v	language:Python
-environment	interpret.py	/^    environment = deque([{}])$/;"	v	language:Python
+main	main.s	/^main:$/;"	l	language:Asm
+main	main.c	/^int main() {$/;"	f	language:C
+name	setup.py	/^    name='interpreter',$/;"	v	language:Python
+packages	setup.py	/^    packages=['interpreter'],$/;"	v	language:Python
+license	setup.py	/^    license='MIT',$/;"	v	language:Python
+entry_points	setup.py	/^    entry_points={$/;"	v	language:Python
+include_package_data	setup.py	/^    include_package_data=True,$/;"	v	language:Python
+install_requires	setup.py	/^    install_requires=['graphviz'],$/;"	v	language:Python
+setup_requires	setup.py	/^    setup_requires=[$/;"	v	language:Python
+tests_require	setup.py	/^    tests_require=[$/;"	v	language:Python
+Param	interpreter/parse.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
+Token	interpreter/parse.py	/^class Token:$/;"	c	language:Python
+__init__	interpreter/parse.py	/^    def __init__(self, lexeme):$/;"	m	language:Python	class:Token
+val	interpreter/parse.py	/^    def val(self):$/;"	m	language:Python	class:Token
+is_temporary	interpreter/parse.py	/^    def is_temporary(self):$/;"	m	language:Python	class:Token
+is_string	interpreter/parse.py	/^    def is_string(self):$/;"	m	language:Python	class:Token
+is_identifier	interpreter/parse.py	/^    def is_identifier(self):$/;"	m	language:Python	class:Token
+is_constant	interpreter/parse.py	/^    def is_constant(self):$/;"	m	language:Python	class:Token
+__repr__	interpreter/parse.py	/^    def __repr__(self):$/;"	m	language:Python	class:Token	file:
+__str__	interpreter/parse.py	/^    def __str__(self):$/;"	m	language:Python	class:Token	file:
+Node	interpreter/parse.py	/^class Node:$/;"	c	language:Python
+func_params	interpreter/parse.py	/^    def func_params(self):$/;"	m	language:Python	class:Node
+func_args	interpreter/parse.py	/^    def func_args(self):$/;"	m	language:Python	class:Node
+is_leaf	interpreter/parse.py	/^    def is_leaf(self):$/;"	m	language:Python	class:Node
+has_branches	interpreter/parse.py	/^    def has_branches(self):$/;"	m	language:Python	class:Node
+__str__	interpreter/parse.py	/^    def __str__(self):$/;"	m	language:Python	class:Node	file:
+__repr__	interpreter/parse.py	/^    def __repr__(self):$/;"	m	language:Python	class:Node	file:
+__iter__	interpreter/parse.py	/^    def __iter__(self):$/;"	m	language:Python	class:Node	file:
+parse_ast	interpreter/parse.py	/^def parse_ast(ast):$/;"	f	language:Python
+get_next_indented	interpreter/parse.py	/^def get_next_indented(nodes, head):$/;"	f	language:Python
+parse	interpreter/parse.py	/^def parse(nodes):$/;"	f	language:Python
+line_count	interpreter/utils.py	/^def line_count(f):$/;"	f	language:Python
+draw_graph	interpreter/utils.py	/^def draw_graph(head):$/;"	f	language:Python
+build_graph	interpreter/utils.py	/^def build_graph(graph, node):$/;"	f	language:Python
+operators	interpreter/interpret.py	/^operators = {$/;"	v	language:Python
+Param	interpreter/interpret.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
+Func	interpreter/interpret.py	/^Func = namedtuple('Func', ['environment', 'signature', 'body'])$/;"	v	language:Python
+interpret	interpreter/interpret.py	/^def interpret(node, environment):$/;"	f	language:Python
+parse_args	interpreter/interpret.py	/^def parse_args():$/;"	f	language:Python
+make_ast	interpreter/interpret.py	/^def make_ast(f):$/;"	f	language:Python
+interpret_node	interpreter/interpret.py	/^def interpret_node(node):$/;"	f	language:Python
+main	interpreter/interpret.py	/^def main():$/;"	f	language:Python
+interpret_file	tests/test_interpret.py	/^def interpret_file(fname):$/;"	f	language:Python
+test_operators	tests/test_interpret.py	/^def test_operators():$/;"	f	language:Python
+test_scope	tests/test_interpret.py	/^def test_scope():$/;"	f	language:Python
+test_functions	tests/test_interpret.py	/^def test_functions():$/;"	f	language:Python
+test_conditionals	tests/test_interpret.py	/^def test_conditionals():$/;"	f	language:Python

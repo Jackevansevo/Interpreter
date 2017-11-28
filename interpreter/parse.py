@@ -1,15 +1,72 @@
 from collections import namedtuple
-from operator import attrgetter
 from itertools import chain, islice, repeat
+from operator import attrgetter
+from re import match
+
+Param = namedtuple('Param', ['type', 'name'])
+
+
+class Token:
+
+    def __init__(self, lexeme):
+        self.lexeme = str(lexeme)
+
+    @property
+    def val(self):
+        if self.lexeme.isdigit():
+            return eval(self.lexeme)
+
+    @property
+    def is_temporary(self):
+        return match(r"t\d+", self.lexeme)
+
+    @property
+    def is_identifier(self):
+        return self.lexeme.isalpha()
+
+    @property
+    def is_constant(self):
+        return self.lexeme.isdigit()
+
+    def __repr__(self):
+        return f'<Token(lexeme={self.lexeme})>'
+
+    def __str__(self):
+        return self.lexeme
 
 
 class Node:
 
+    @property
+    def func_params(self):
+        if not self.lhs.rhs.rhs:
+            return []
+        signature = self.lhs.rhs.rhs
+        leaf_nodes = filter(attrgetter('is_leaf'), iter(signature))
+        param_nodes = [leaf.tok.lexeme for leaf in leaf_nodes]
+        return [Param(*p) for p in zip(param_nodes[::2], param_nodes[1::2])]
+
+    @property
+    def func_args(self):
+        if self.tok.lexeme == ",":
+            yield from self.lhs.func_args
+            yield from self.rhs.func_args
+        else:
+            yield self
+
+    @property
+    def is_leaf(self):
+        return not any([self.lhs, self.rhs])
+
+    @property
+    def has_branches(self):
+        return self.lhs and self.rhs
+
     def __str__(self):
-        return self.tok
+        return str(self.tok)
 
     def __repr__(self):
-        return f'<Node(tok={self.tok})>'
+        return f'<Node(tok="{self.tok}")>'
 
     def __iter__(self):
         if self.lhs:
@@ -17,22 +74,6 @@ class Node:
         yield self
         if self.rhs:
             yield from self.rhs
-
-    @property
-    def leaf_children(self):
-        return filter(attrgetter('is_leaf'), iter(self))
-
-    @property
-    def is_identifier(self):
-        return self.tok.isalpha()
-
-    @property
-    def is_constant(self):
-        return self.tok.isdigit()
-
-    @property
-    def is_leaf(self):
-        return not all([self.lhs, self.rhs])
 
 
 def parse_ast(ast):
@@ -59,13 +100,7 @@ def parse(nodes):
     head, *rest = nodes
     node = Node()
 
-    node.tok = head.tok
-
-    # Store integer values
-    if node.tok.isdigit():
-        node.val = int(node.tok)
-    else:
-        node.val = None
+    node.tok = Token(head.tok)
 
     children = get_next_indented(rest, head)
 

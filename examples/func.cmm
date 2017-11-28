@@ -1,0 +1,9 @@
+/* Answer: 5 */
+
+int example() {
+  return 5;
+}
+
+int main() {
+  return example();
+}

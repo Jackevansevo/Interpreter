@@ -1,3 +1,0 @@
-int something() { return 2; }
-
-int main() { return something(); }

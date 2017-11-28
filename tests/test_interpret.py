@@ -1,18 +1,18 @@
-from interpreter.interpret import interpret_file
+import re
+from glob import glob
+
+from interpreter.interpret import make_ast, parse_ast, interpret_tree
+
+ANSWER_REGEX = re.compile(r"\/\*\s*Answer:\s*(\d*)\s*\*\/")
 
 
-def test_operators():
-    assert interpret_file('examples/operators.cmm') == 2
-
-
-def test_scope():
-    assert interpret_file('examples/scope.cmm') == 5
-
-
-def test_functions():
-    assert interpret_file('examples/function.cmm') == 7
-
-
-def test_conditionals():
-    assert interpret_file('examples/if_statement.cmm') == 1
-    assert interpret_file('examples/if_else_statement.cmm') == 1
+def test_files():
+    for fname in glob('examples/*.cmm'):
+        with open(fname) as f:
+            head = f.readline().strip()
+            match = ANSWER_REGEX.match(head)
+            if match:
+                expected = match.group(1)
+                f.seek(0)
+                result = interpret_tree(parse_ast(make_ast(f)))
+                assert str(result) == expected, f"{fname}"
