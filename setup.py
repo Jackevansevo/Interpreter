@@ -15,7 +15,7 @@ setup(
         ]
     },
     include_package_data=True,
-    install_requires=['graphviz'],
+    install_requires=['graphviz', 'attrs'],
     setup_requires=[
         'pytest-runner',
     ],
