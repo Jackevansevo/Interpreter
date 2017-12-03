@@ -25,7 +25,7 @@ Inside the projects virtual environment run:
 
 See more programs in `\examples`
 
---C has a c like syntax:
+**Operators**
 
 ```c
 /* Answer: 4 */
@@ -33,7 +33,6 @@ See more programs in `\examples`
 int main() {
   return ((1 + 2) * 4) / 3;
 }
-
 ```
 
 **Conditionals**
@@ -69,7 +68,6 @@ int main() {
 
 **Recursion**
 
-
 ```c
 /* Answer: 21 */
 
@@ -103,9 +101,6 @@ int main() {
   return cube(2);
 }
 ```
-
-
-
 
 ## Running Tests
 
