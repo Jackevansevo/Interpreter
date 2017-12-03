@@ -1,0 +1,10 @@
+/* Error: Type Error */
+
+int inc(int x) {
+  x = x + 1;
+}
+
+int main() {
+  int x = inc(5);
+  return 5;
+}

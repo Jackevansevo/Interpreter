@@ -1,0 +1,4 @@
+/* Error: x Undefined */
+int main() {
+  return x;
+}

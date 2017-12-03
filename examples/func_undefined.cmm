@@ -1,0 +1,5 @@
+/* Error: NameError: func 'square' undefined */ 
+int main() {
+  square();
+  return 0;
+}

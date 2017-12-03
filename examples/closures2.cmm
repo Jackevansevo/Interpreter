@@ -10,7 +10,7 @@ function twice(function f) {
 }
 
 int main() {
-  cube = twice(square);
+  int cube = twice(square);
   return cube(2);
 }
 

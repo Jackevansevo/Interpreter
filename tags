@@ -4,8 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-main	main.s	/^main:$/;"	l	language:Asm
-main	main.c	/^int main() {$/;"	f	language:C
+test_requirements	setup.py	/^test_requirements = [$/;"	v	language:Python
 name	setup.py	/^    name='interpreter',$/;"	v	language:Python
 packages	setup.py	/^    packages=['interpreter'],$/;"	v	language:Python
 license	setup.py	/^    license='MIT',$/;"	v	language:Python
@@ -13,41 +12,73 @@ entry_points	setup.py	/^    entry_points={$/;"	v	language:Python
 include_package_data	setup.py	/^    include_package_data=True,$/;"	v	language:Python
 install_requires	setup.py	/^    install_requires=['graphviz'],$/;"	v	language:Python
 setup_requires	setup.py	/^    setup_requires=[$/;"	v	language:Python
-tests_require	setup.py	/^    tests_require=[$/;"	v	language:Python
-Param	interpreter/parse.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
-Token	interpreter/parse.py	/^class Token:$/;"	c	language:Python
-__init__	interpreter/parse.py	/^    def __init__(self, lexeme):$/;"	m	language:Python	class:Token
-val	interpreter/parse.py	/^    def val(self):$/;"	m	language:Python	class:Token
-is_temporary	interpreter/parse.py	/^    def is_temporary(self):$/;"	m	language:Python	class:Token
-is_string	interpreter/parse.py	/^    def is_string(self):$/;"	m	language:Python	class:Token
-is_identifier	interpreter/parse.py	/^    def is_identifier(self):$/;"	m	language:Python	class:Token
-is_constant	interpreter/parse.py	/^    def is_constant(self):$/;"	m	language:Python	class:Token
-__repr__	interpreter/parse.py	/^    def __repr__(self):$/;"	m	language:Python	class:Token	file:
-__str__	interpreter/parse.py	/^    def __str__(self):$/;"	m	language:Python	class:Token	file:
-Node	interpreter/parse.py	/^class Node:$/;"	c	language:Python
-func_params	interpreter/parse.py	/^    def func_params(self):$/;"	m	language:Python	class:Node
-func_args	interpreter/parse.py	/^    def func_args(self):$/;"	m	language:Python	class:Node
-is_leaf	interpreter/parse.py	/^    def is_leaf(self):$/;"	m	language:Python	class:Node
-has_branches	interpreter/parse.py	/^    def has_branches(self):$/;"	m	language:Python	class:Node
-__str__	interpreter/parse.py	/^    def __str__(self):$/;"	m	language:Python	class:Node	file:
-__repr__	interpreter/parse.py	/^    def __repr__(self):$/;"	m	language:Python	class:Node	file:
-__iter__	interpreter/parse.py	/^    def __iter__(self):$/;"	m	language:Python	class:Node	file:
+tests_require	setup.py	/^    tests_require=test_requirements,$/;"	v	language:Python
+extras_require	setup.py	/^    extras_require={$/;"	v	language:Python
 parse_ast	interpreter/parse.py	/^def parse_ast(ast):$/;"	f	language:Python
 get_next_indented	interpreter/parse.py	/^def get_next_indented(nodes, head):$/;"	f	language:Python
 parse	interpreter/parse.py	/^def parse(nodes):$/;"	f	language:Python
+Token	interpreter/token.py	/^class Token:$/;"	c	language:Python
+__init__	interpreter/token.py	/^    def __init__(self, lexeme):$/;"	m	language:Python	class:Token
+val	interpreter/token.py	/^    def val(self):$/;"	m	language:Python	class:Token
+is_temporary	interpreter/token.py	/^    def is_temporary(self):$/;"	m	language:Python	class:Token
+is_identifier	interpreter/token.py	/^    def is_identifier(self):$/;"	m	language:Python	class:Token
+is_constant	interpreter/token.py	/^    def is_constant(self):$/;"	m	language:Python	class:Token
+__repr__	interpreter/token.py	/^    def __repr__(self):$/;"	m	language:Python	class:Token	file:
+__str__	interpreter/token.py	/^    def __str__(self):$/;"	m	language:Python	class:Token	file:
 line_count	interpreter/utils.py	/^def line_count(f):$/;"	f	language:Python
 draw_graph	interpreter/utils.py	/^def draw_graph(head):$/;"	f	language:Python
 build_graph	interpreter/utils.py	/^def build_graph(graph, node):$/;"	f	language:Python
 operators	interpreter/interpret.py	/^operators = {$/;"	v	language:Python
-Param	interpreter/interpret.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
-Func	interpreter/interpret.py	/^Func = namedtuple('Func', ['environment', 'signature', 'body'])$/;"	v	language:Python
-interpret	interpreter/interpret.py	/^def interpret(node, environment):$/;"	f	language:Python
+ret_val	interpreter/interpret.py	/^ret_val = None$/;"	v	language:Python
+returning	interpreter/interpret.py	/^returning = False$/;"	v	language:Python
+Func	interpreter/interpret.py	/^Func = namedtuple('Func', ['node', 'env'])$/;"	v	language:Python
+interpret_tree	interpreter/interpret.py	/^def interpret_tree(head):$/;"	f	language:Python
+interpret_if	interpreter/interpret.py	/^def interpret_if(node, environment):$/;"	f	language:Python
+interpret_return	interpreter/interpret.py	/^def interpret_return(node, environment):$/;"	f	language:Python
+interpret_function	interpreter/interpret.py	/^def interpret_function(node, environment):$/;"	f	language:Python
+get_args_list	interpreter/interpret.py	/^def get_args_list(node, environment):$/;"	f	language:Python
+type_check_args	interpreter/interpret.py	/^def type_check_args(params, args):$/;"	f	language:Python
+check_args	interpreter/interpret.py	/^def check_args(func, params, args):$/;"	f	language:Python
+check_return_type	interpreter/interpret.py	/^def check_return_type(return_type, ret_val):$/;"	f	language:Python
+interpret_apply	interpreter/interpret.py	/^def interpret_apply(node, environment):$/;"	f	language:Python
+interpret_operators	interpreter/interpret.py	/^def interpret_operators(node, environment):$/;"	f	language:Python
+interpret_binding	interpreter/interpret.py	/^def interpret_binding(node, environment):$/;"	f	language:Python
+interpret_assingment	interpreter/interpret.py	/^def interpret_assingment(node, environment):$/;"	f	language:Python
+default_interpret	interpreter/interpret.py	/^def default_interpret(node, environment):$/;"	f	language:Python
+cases	interpreter/interpret.py	/^cases = {$/;"	v	language:Python
+recursive_interpret	interpreter/interpret.py	/^def recursive_interpret(node, environment):$/;"	f	language:Python
 parse_args	interpreter/interpret.py	/^def parse_args():$/;"	f	language:Python
 make_ast	interpreter/interpret.py	/^def make_ast(f):$/;"	f	language:Python
-interpret_node	interpreter/interpret.py	/^def interpret_node(node):$/;"	f	language:Python
 main	interpreter/interpret.py	/^def main():$/;"	f	language:Python
-interpret_file	tests/test_interpret.py	/^def interpret_file(fname):$/;"	f	language:Python
-test_operators	tests/test_interpret.py	/^def test_operators():$/;"	f	language:Python
-test_scope	tests/test_interpret.py	/^def test_scope():$/;"	f	language:Python
-test_functions	tests/test_interpret.py	/^def test_functions():$/;"	f	language:Python
-test_conditionals	tests/test_interpret.py	/^def test_conditionals():$/;"	f	language:Python
+Frame	interpreter/frame.py	/^class Frame:$/;"	c	language:Python
+__init__	interpreter/frame.py	/^    def __init__(self, _bindings, parent):$/;"	m	language:Python	class:Frame
+get	interpreter/frame.py	/^    def get(self, value):$/;"	m	language:Python	class:Frame
+bindings	interpreter/frame.py	/^    def bindings(self):$/;"	m	language:Python	class:Frame
+__iter__	interpreter/frame.py	/^    def __iter__(self):$/;"	m	language:Python	class:Frame	file:
+__getitem__	interpreter/frame.py	/^    def __getitem__(self, key):$/;"	m	language:Python	class:Frame	file:
+__setitem__	interpreter/frame.py	/^    def __setitem__(self, key, val):$/;"	m	language:Python	class:Frame	file:
+__str__	interpreter/frame.py	/^    def __str__(self):$/;"	m	language:Python	class:Frame	file:
+__repr__	interpreter/frame.py	/^    def __repr__(self):$/;"	m	language:Python	class:Frame	file:
+Param	interpreter/node.py	/^Param = namedtuple('Param', ['type', 'name'])$/;"	v	language:Python
+Node	interpreter/node.py	/^class Node:$/;"	c	language:Python
+return_type	interpreter/node.py	/^    def return_type(self):$/;"	m	language:Python	class:Node
+func_params	interpreter/node.py	/^    def func_params(self):$/;"	m	language:Python	class:Node
+func_args	interpreter/node.py	/^    def func_args(self):$/;"	m	language:Python	class:Node
+is_func	interpreter/node.py	/^    def is_func(self):$/;"	m	language:Python	class:Node
+is_leaf	interpreter/node.py	/^    def is_leaf(self):$/;"	m	language:Python	class:Node
+has_branches	interpreter/node.py	/^    def has_branches(self):$/;"	m	language:Python	class:Node
+__str__	interpreter/node.py	/^    def __str__(self):$/;"	m	language:Python	class:Node	file:
+__repr__	interpreter/node.py	/^    def __repr__(self):$/;"	m	language:Python	class:Node	file:
+__iter__	interpreter/node.py	/^    def __iter__(self):$/;"	m	language:Python	class:Node	file:
+test_getitem	tests/test_frame.py	/^def test_getitem():$/;"	f	language:Python
+test_setitem	tests/test_frame.py	/^def test_setitem():$/;"	f	language:Python
+test_overrides_parent_scope	tests/test_frame.py	/^def test_overrides_parent_scope():$/;"	f	language:Python
+test_get	tests/test_frame.py	/^def test_get():$/;"	f	language:Python
+test_str	tests/test_frame.py	/^def test_str():$/;"	f	language:Python
+test_val	tests/test_token.py	/^def test_val():$/;"	f	language:Python
+test_is_temporary	tests/test_token.py	/^def test_is_temporary():$/;"	f	language:Python
+test_str	tests/test_token.py	/^def test_str():$/;"	f	language:Python
+test_line_count	tests/test_utils.py	/^def test_line_count():$/;"	f	language:Python
+test_return_type	tests/test_node.py	/^def test_return_type():$/;"	f	language:Python
+ANSWER_REGEX	tests/test_interpret.py	/^ANSWER_REGEX = re.compile(r"\\\/\\*\\s*Answer:\\s*(\\d*)\\s*\\*\\\/")$/;"	v	language:Python
+test_files	tests/test_interpret.py	/^def test_files():$/;"	f	language:Python

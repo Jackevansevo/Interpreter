@@ -1,0 +1,10 @@
+/* Error: Wrong number of arguments passed to func three_args */
+
+int three_args(int x, int y, int z) {
+  return x + y + z;
+}
+
+int main() {
+  three_args(1, 2);
+  return 0;
+}

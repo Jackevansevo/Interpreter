@@ -1,3 +1,4 @@
+from attr import attrs, attrib
 import argparse
 import sys
 from collections import namedtuple
@@ -8,121 +9,141 @@ from interpreter.frame import Frame
 from interpreter.parse import parse_ast
 from interpreter.utils import draw_graph, line_count
 
+# [TODO] Get rid of horrible Global returns (perhaps store in Frame)
+
 operators = {
     '+': add, '-': sub, '*': mul, '%': mod, '/': floordiv,
     '==': eq, '!=': ne, '>': gt, '<': lt, '>=': ge, '<=': le
 }
 
-ret_val = None
-returning = False
-
 # Function parameter type
 Func = namedtuple('Func', ['node', 'env'])
 
 
+@attrs
+class ReturnObj:
+
+    returning = attrib()
+    ret_type = attrib()
+    ret_val = attrib()
+
+
 def interpret_tree(head):
-    # Reset globals
-    global returning
-    global ret_val
-    returning = False
-    ret_val = None
-    interpret(head, Frame({}, {}))
-    return ret_val
+    global Return
+    Return = ReturnObj(False, None, None)
+    recursive_interpret(head, Frame({}, {}))
+    check_return_type(Return)
+    return Return.ret_val
 
 
 def interpret_if(node, environment):
     # Check if the if statement has an else clause
-    predicate = interpret(node.lhs, environment)
-
+    predicate = recursive_interpret(node.lhs, environment)
+    new_frame = Frame({}, environment)
     if node.rhs.tok.lexeme == "else":
         if predicate:
-            return interpret(node.rhs.lhs, Frame({}, environment))
+            return recursive_interpret(node.rhs.lhs, new_frame)
         else:
-            return interpret(node.rhs.rhs, Frame({}, environment))
+            return recursive_interpret(node.rhs.rhs, new_frame)
     else:
-        if interpret(node.lhs, environment):
-            return interpret(node.rhs, Frame({}, environment))
-        else:
-            return
+        if recursive_interpret(node.lhs, environment):
+            return recursive_interpret(node.rhs, new_frame)
 
 
 def interpret_return(node, environment):
-    global returning
-    global ret_val
-    ret_val = interpret(node.lhs, environment)
-    returning = True
-    return
+    global Return
+    Return.ret_val = recursive_interpret(node.lhs, environment)
+    Return.returning = True
 
 
 def interpret_function(node, environment):
+    global Return
     # Save the functions node and current environment in the environment
     func = Func(node, environment)
+    Return.type = node.return_type
     environment.bindings[node.lhs.rhs.lhs.tok.lexeme] = func
 
     # Check if function is main
     if node.lhs.rhs.lhs.tok.lexeme == "main":
-        return interpret(node.rhs, Frame({}, environment))
+        Return.ret_type = node.return_type
+        return recursive_interpret(node.rhs, Frame({}, environment))
     else:
         # Avoid interpreting other functions
         return
 
 
+def get_args_list(node, environment):
+    if node.rhs:
+        return [
+            recursive_interpret(n, environment) for n in node.rhs.func_args
+        ]
+
+
+def check_args(func, params, args):
+    # Checks length of arguments against function params
+    if len(params) != len(args):
+        func_name = func.lhs.rhs.lhs
+        param_str = list(map(tuple, params))
+        outlines = [
+            f"Wrong number of arguments passed to func {func_name}",
+            f"Expected: {len(params)} \n  {param_str}",
+            f"Got {len(args)} \n  {args}"
+        ]
+        sys.exit('\n'.join(outlines))
+
+
+def check_return_type(Return):
+    if Return.ret_type == 'int' and not isinstance(Return.ret_val, int):
+        outlines = [
+            "Type Error:",
+            f"  Expected {Return.ret_type}",
+            f"  Given {type(Return.ret_val)}"
+        ]
+        sys.exit('\n'.join(outlines))
+
+
 def interpret_apply(node, environment):
 
-    global returning
-    global ret_val
+    global Return
 
     if node.lhs.tok.lexeme == "print":
-        print(interpret(node.rhs, environment))
+        print(recursive_interpret(node.rhs, environment))
         return
 
-    try:
-        func, env = environment[node.lhs.tok.lexeme]
-    except KeyError as error:
-        sys.exit(f'NameError: func {error} undefined')
+    if node.lhs.tok.lexeme == "apply":
+        # recursive_interpret the lhs of the apply
+        func, env = recursive_interpret(node.lhs, environment)
     else:
-        if node.rhs:
-            args = [interpret(n, environment) for n in node.rhs.func_args]
-        else:
-            args = []
-        params = func.func_params
+        try:
+            func, env = environment[node.lhs.tok.lexeme]
+        except KeyError as error:
+            sys.exit(f'NameError: func {error} undefined')
 
-        # Checks length of arguments against function params
-        if len(params) != len(args):
-            func_name = func.lhs.rhs.lhs
-            print(f"Wrong number of arguments passed to func {func_name}")
-            param_str = list(map(tuple, params))
-            print("Expected:", len(params), "\n ", param_str)
-            print("Got:", len(args), "\n ", args)
-            sys.exit(1)
+    args = get_args_list(node, environment) or []
+    params = func.func_params
 
-        # Basic type checking
-        for param, arg in zip(params, args):
-            if param.type == "int" and not isinstance(arg, int):
-                print("Type Error")
-                print(f"Expected: {param.type}")
-                print(f"Given {arg}")
-                sys.exit(1)
+    check_args(func, params, args)
 
-        bindings = {p.name: a for p, a in zip(params, args)}
-        # Create new environment for function with bindings from env
-        new_frame = Frame(bindings, environment[node.lhs.tok.lexeme].env)
-        interpret(func.rhs, new_frame)
-        if returning:
-            returning = False
-        return_type = func.lhs.lhs.tok.lexeme
-        if return_type == 'int' and not isinstance(ret_val, int):
-            print("Type Error")
-            print(f"Expected: {return_type}")
-            print(f"Given {type(ret_val)}")
-            sys.exit(1)
-        return ret_val
+    # Create new environment for function with bindings from env
+    bindings = {p.name: a for p, a in zip(params, args)}
+    new_frame = Frame(bindings, env)
+
+    Return.ret_type = func.return_type
+
+    recursive_interpret(func.rhs, new_frame)
+
+    if Return.returning:
+        # if returning:
+        Return.returning = False
+
+    check_return_type(Return)
+    return Return.ret_val
 
 
 def interpret_operators(node, environment):
     return int(operators[node.tok.lexeme](
-        interpret(node.lhs, environment),
-        interpret(node.rhs, environment)
+        recursive_interpret(node.lhs, environment),
+        recursive_interpret(node.rhs, environment)
     ))
 
 
@@ -130,40 +151,37 @@ def interpret_binding(node, environment):
     # Initialize variables
     if node.lhs.tok.lexeme == "int" and node.rhs.tok.lexeme != "=":
         environment.bindings[node.rhs.tok.lexeme] = 0
-    elif node.lhs.tok.lexeme == "function":
-        environment.bindings[node.rhs.tok.lexeme] = (None, None)
-    interpret(node.lhs, environment)
-    return interpret(node.rhs, environment)
+    recursive_interpret(node.lhs, environment)
+    return recursive_interpret(node.rhs, environment)
 
 
 def interpret_assingment(node, environment):
     # Handle assingments
-    rhs = interpret(node.rhs, environment)
+    rhs = recursive_interpret(node.rhs, environment)
     environment[node.lhs.tok.lexeme] = rhs
 
 
 def default_interpret(node, environment):
-    interpret(node.lhs, environment)
-    return interpret(node.rhs, environment)
+    recursive_interpret(node.lhs, environment)
+    return recursive_interpret(node.rhs, environment)
 
 
 cases = {
     ';': default_interpret,
+    '~': interpret_binding,
     '=': interpret_assingment,
     'D': interpret_function,
-    'apply': interpret_apply,
     'if': interpret_if,
+    'apply': interpret_apply,
     'return': interpret_return,
-    '~': interpret_binding,
 }
 
 
-def interpret(node, environment):
+def recursive_interpret(node, environment):
 
-    global returning
-    global ret_val
+    global Return
 
-    if returning:
+    if Return.returning:
         return
 
     if node.is_leaf:
@@ -172,14 +190,14 @@ def interpret(node, environment):
             return
 
         # Return underlying value of a constant
-        if node.tok.is_constant:
+        elif node.tok.is_constant:
             return node.tok.val
 
-        if node.tok.is_identifier:
-            var = environment.get(node.tok.lexeme)
-            if var is None:
-                sys.exit(f"{node.tok} Undefined")
-            return var
+        # Else check the environment
+        var = environment.get(node.tok.lexeme)
+        if var is None:
+            sys.exit(f"{node.tok} Undefined")
+        return var
 
     # Handle maths operators
     elif node.tok.lexeme in operators:
@@ -190,7 +208,7 @@ def interpret(node, environment):
         if interpret_case:
             return interpret_case(node, environment)
         else:
-            raise Exception(f"Unrecognised token: {node.tok}")
+            sys.exit(f"Unrecognised token: {node.tok}")
 
 
 def parse_args():
@@ -212,8 +230,7 @@ def make_ast(f):
 
     if outlines[-1] == 'syntax error':
         # Exit if syntax error encountered
-        sys.stdout.write(output)
-        sys.exit(1)
+        sys.exit(output)
 
     ast = outlines[line_count(f):]
 
@@ -238,4 +255,4 @@ def main():
     interpret_tree(head)
 
     # Exit with correct status code
-    sys.exit(ret_val)
+    sys.exit(Return.ret_val)
