@@ -1,9 +1,0 @@
-int even(int b) {
-  if(b == 2) return 1;
-  return 0;
-}
-
-
-int main() {
-  return even(2);
-}

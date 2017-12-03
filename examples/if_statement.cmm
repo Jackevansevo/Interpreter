@@ -1,7 +1,6 @@
 /* Answer: 0 */
 
 int main() {
-  int x = 8;
-  if (x == 8) return 0;
+  if (8 % 2 == 0) return 0;
   return 1;
 }
