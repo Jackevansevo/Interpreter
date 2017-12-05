@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/Jackevansevo/Interpreter.svg?branch=master)](https://travis-ci.org/Jackevansevo/Interpreter)
-[![Coverage Status](https://coveralls.io/repos/github/Jackevansevo/Interpreter/badge.svg?branch=master)](https://coveralls.io/github/Jackevansevo/Interpreter?branch=master)
+[![Build Status](https://travis-ci.org/Jackevansevo/interpreter.svg?branch=master)](https://travis-ci.org/Jackevansevo/interpreter)
+[![Coverage Status](https://coveralls.io/repos/github/Jackevansevo/interpreter/badge.svg?branch=master)](https://coveralls.io/github/Jackevansevo/interpreter?branch=master)
 
 # --C Interpreter
 
