@@ -1,0 +1,12 @@
+/* Answer: 6 */
+
+int x = 10;
+
+int func() {
+  return x + 2;
+}
+
+int main() {
+  x = 4;
+  return func();
+}
