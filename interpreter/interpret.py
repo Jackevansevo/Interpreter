@@ -88,12 +88,14 @@ def check_args(func, params, args):
 
 
 def check_return_type(Return):
+    outlines = [
+        "Type Error:",
+        f"  Expected {Return.ret_type}",
+        f"  Given {type(Return.ret_val)}"
+    ]
     if Return.ret_type == 'int' and not isinstance(Return.ret_val, int):
-        outlines = [
-            "Type Error:",
-            f"  Expected {Return.ret_type}",
-            f"  Given {type(Return.ret_val)}"
-        ]
+        sys.exit('\n'.join(outlines))
+    elif Return.ret_type == 'function' and isinstance(Return.ret_val, int):
         sys.exit('\n'.join(outlines))
 
 
