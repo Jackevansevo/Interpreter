@@ -22,13 +22,12 @@ Func = namedtuple('Func', ['node', 'env'])
 
 @attrs
 class ReturnObj:
-
     returning = attrib()
     ret_type = attrib()
     ret_val = attrib()
 
 
-def interpret_tree(head):
+def interpret_node(head):
     global Return
     Return = ReturnObj(False, None, None)
     recursive_interpret(head, Frame({}, {}))
@@ -40,7 +39,7 @@ def interpret_if(node, environment):
     # Check if the if statement has an else clause
     predicate = recursive_interpret(node.lhs, environment)
     new_frame = Frame({}, environment)
-    if node.rhs.tok.lexeme == "else":
+    if node.rhs.tok == "else":
         if predicate:
             return recursive_interpret(node.rhs.lhs, new_frame)
         else:
@@ -59,17 +58,13 @@ def interpret_return(node, environment):
 def interpret_function(node, environment):
     global Return
     # Save the functions node and current environment in the environment
-    func = Func(node, environment)
     Return.type = node.return_type
-    environment.bindings[node.lhs.rhs.lhs.tok.lexeme] = func
+    environment.bindings[node.lhs.rhs.lhs.tok] = Func(node, environment)
 
     # Check if function is main
-    if node.lhs.rhs.lhs.tok.lexeme == "main":
+    if node.lhs.rhs.lhs.tok == "main":
         Return.ret_type = node.return_type
         return recursive_interpret(node.rhs, Frame({}, environment))
-    else:
-        # Avoid interpreting other functions
-        return
 
 
 def get_args_list(node, environment):
@@ -85,7 +80,7 @@ def check_args(func, params, args):
         func_name = func.lhs.rhs.lhs
         param_str = list(map(tuple, params))
         outlines = [
-            f"Wrong number of arguments passed to func {func_name}",
+            f"Wrong number of arguments passed to func {func_name.tok}",
             f"Expected: {len(params)} \n  {param_str}",
             f"Got {len(args)} \n  {args}"
         ]
@@ -106,16 +101,16 @@ def interpret_apply(node, environment):
 
     global Return
 
-    if node.lhs.tok.lexeme == "print":
+    if node.lhs.tok == "print":
         print(recursive_interpret(node.rhs, environment))
         return
 
-    if node.lhs.tok.lexeme == "apply":
+    if node.lhs.tok == "apply":
         # recursive_interpret the lhs of the apply
         func, env = recursive_interpret(node.lhs, environment)
     else:
         try:
-            func, env = environment[node.lhs.tok.lexeme]
+            func, env = environment[node.lhs.tok]
         except KeyError as error:
             sys.exit(f'NameError: func {error} undefined')
 
@@ -141,7 +136,7 @@ def interpret_apply(node, environment):
 
 
 def interpret_operators(node, environment):
-    return int(operators[node.tok.lexeme](
+    return int(operators[node.tok](
         recursive_interpret(node.lhs, environment),
         recursive_interpret(node.rhs, environment)
     ))
@@ -149,8 +144,8 @@ def interpret_operators(node, environment):
 
 def interpret_binding(node, environment):
     # Initialize variables
-    if node.lhs.tok.lexeme == "int" and node.rhs.tok.lexeme != "=":
-        environment.bindings[node.rhs.tok.lexeme] = 0
+    if node.lhs.tok == "int" and node.rhs.tok != "=":
+        environment.bindings[node.rhs.tok] = 0
     recursive_interpret(node.lhs, environment)
     return recursive_interpret(node.rhs, environment)
 
@@ -158,7 +153,7 @@ def interpret_binding(node, environment):
 def interpret_assingment(node, environment):
     # Handle assingments
     rhs = recursive_interpret(node.rhs, environment)
-    environment[node.lhs.tok.lexeme] = rhs
+    environment[node.lhs.tok] = rhs
 
 
 def default_interpret(node, environment):
@@ -186,25 +181,25 @@ def recursive_interpret(node, environment):
 
     if node.is_leaf:
 
-        if node.tok.lexeme == "int":
+        if node.tok == "int":
             return
 
         # Return underlying value of a constant
-        elif node.tok.is_constant:
-            return node.tok.val
+        elif node.is_constant:
+            return int(node.tok)
 
         # Else check the environment
-        var = environment.get(node.tok.lexeme)
+        var = environment.get(node.tok)
         if var is None:
             sys.exit(f"{node.tok} Undefined")
         return var
 
     # Handle maths operators
-    elif node.tok.lexeme in operators:
+    elif node.tok in operators:
         return interpret_operators(node, environment)
 
     else:
-        interpret_case = cases.get(node.tok.lexeme)
+        interpret_case = cases.get(node.tok)
         if interpret_case:
             return interpret_case(node, environment)
         else:
@@ -252,7 +247,7 @@ def main():
     if args.graph:
         draw_graph(head)
 
-    interpret_tree(head)
+    interpret_node(head)
 
     # Exit with correct status code
     sys.exit(Return.ret_val)
