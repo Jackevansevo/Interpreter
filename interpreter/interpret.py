@@ -152,8 +152,8 @@ def interpret_binding(node, environment):
     return recursive_interpret(node.rhs, environment)
 
 
-def interpret_assingment(node, environment):
-    # Handle assingments
+def interpret_assignment(node, environment):
+    # Handle assignments
     rhs = recursive_interpret(node.rhs, environment)
     environment[node.lhs.tok] = rhs
 
@@ -166,7 +166,7 @@ def default_interpret(node, environment):
 cases = {
     ';': default_interpret,
     '~': interpret_binding,
-    '=': interpret_assingment,
+    '=': interpret_assignment,
     'D': interpret_function,
     'if': interpret_if,
     'apply': interpret_apply,
