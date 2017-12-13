@@ -1,0 +1,11 @@
+/* Error: Type Error */
+
+function func() {
+  return 10;
+}
+
+int main() {
+  int x = func()();
+  print(x);
+  return x;
+}
