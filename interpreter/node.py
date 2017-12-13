@@ -10,6 +10,11 @@ class Node:
     tok = attrib()
 
     @property
+    def func_name(self):
+        if self.is_func:
+            return self.lhs.rhs.lhs.tok
+
+    @property
     def is_constant(self):
         return self.tok.isdigit()
 

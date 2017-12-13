@@ -59,10 +59,10 @@ def interpret_function(node, environment):
     global Return
     # Save the functions node and current environment in the environment
     Return.type = node.return_type
-    environment.bindings[node.lhs.rhs.lhs.tok] = Func(node, environment)
+    environment[node.lhs.rhs.lhs.tok] = Func(node, environment)
 
     # Check if function is main
-    if node.lhs.rhs.lhs.tok == "main":
+    if node.func_name == "main":
         Return.ret_type = node.return_type
         return recursive_interpret(node.rhs, Frame({}, environment))
 
@@ -77,10 +77,10 @@ def get_args_list(node, environment):
 def check_args(func, params, args):
     # Checks length of arguments against function params
     if len(params) != len(args):
-        func_name = func.lhs.rhs.lhs
+        func_name = func.func_name
         param_str = list(map(tuple, params))
         outlines = [
-            f"Wrong number of arguments passed to func {func_name.tok}",
+            f"Wrong number of arguments passed to func {func_name}",
             f"Expected: {len(params)} \n  {param_str}",
             f"Got {len(args)} \n  {args}"
         ]
