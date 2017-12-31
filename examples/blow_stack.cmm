@@ -1,0 +1,8 @@
+void count(int n) {
+  print(n);
+  if (n > 0) return count(n -1); 
+}
+
+int main() {
+  int x = count(130);
+}
